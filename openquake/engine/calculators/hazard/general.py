@@ -18,7 +18,6 @@
 
 """Common code for the hazard calculators."""
 
-import math
 import os
 import random
 import re
@@ -28,7 +27,6 @@ import openquake.hazardlib.site
 import numpy
 
 from django.db import transaction, connections
-from django.db.models import Sum
 from shapely import geometry
 
 from openquake.hazardlib import correlation
@@ -234,12 +232,6 @@ class BaseHazardCalculator(base.Calculator):
     Abstract base class for hazard calculators. Contains a bunch of common
     functionality, like initialization procedures.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(BaseHazardCalculator, self).__init__(*args, **kwargs)
-
-        self.progress.update(in_queue=0)
-
     @property
     def hc(self):
         """
@@ -588,20 +580,6 @@ class BaseHazardCalculator(base.Calculator):
             # full paths enumeration
             self._initialize_realizations_enumeration(
                 rlz_callbacks=rlz_callbacks)
-
-    def initialize_pr_data(self):
-        """Record the total/completed number of work items.
-
-        This is needed for the purpose of providing an indication of progress
-        to the end user."""
-        stats.pk_set(self.job.id, "lvr", 0)
-        rs = models.LtRealization.objects.filter(
-            hazard_calculation=self.job.hazard_calculation)
-        total = rs.aggregate(Sum("total_items"))
-        done = rs.aggregate(Sum("completed_items"))
-        stats.pk_set(self.job.id, "nhzrd_total", total.values().pop())
-        if done > 0:
-            stats.pk_set(self.job.id, "nhzrd_done", done.values().pop())
 
     def _initialize_realizations_enumeration(self, rlz_callbacks=None):
         """

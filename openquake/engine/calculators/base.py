@@ -38,7 +38,6 @@ class Calculator(object):
     def __init__(self, job):
         self.job = job
         self.num_tasks = None
-        self.progress = dict(total=0, computed=0, in_queue=0)
 
     def monitor(self, operation):
         return EnginePerformanceMonitor(

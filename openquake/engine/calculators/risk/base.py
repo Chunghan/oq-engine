@@ -79,8 +79,6 @@ class RiskCalculator(base.Calculator):
                     for t, count in self.taxonomies_asset_count.items()
                     if t in self.risk_models)
 
-        self._initialize_progress(sum(self.taxonomies_asset_count.values()))
-
         for validator_class in self.validators:
             validator = validator_class(self)
             error = validator.get_error()
@@ -202,17 +200,6 @@ class RiskCalculator(base.Calculator):
         provide custom arguments to its celery task
         """
         return []
-
-    def _initialize_progress(self, total):
-        """Record the total/completed number of work items.
-
-        This is needed for the purpose of providing an indication of progress
-        to the end user."""
-        logs.LOG.debug("Computing risk over %d assets" % total)
-        self.progress.update(total=total)
-        stats.pk_set(self.job.id, "lvr", 0)
-        stats.pk_set(self.job.id, "nrisk_total", total)
-        stats.pk_set(self.job.id, "nrisk_done", 0)
 
     def get_risk_models(self, retrofitted=False):
         """
